@@ -154,15 +154,19 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// @route   POST /api/documents/trigger-reminders - Manually run daily scan
-router.post('/trigger-reminders', async (req, res) => {
+// @route   GET /api/documents/trigger-reminders - Called by Vercel Cron (Vercel always uses GET)
+// @route   POST /api/documents/trigger-reminders - Called manually from frontend button
+const handleTriggerReminders = async (req, res) => {
   try {
     const result = await checkAndSendReminders();
     res.json({ message: 'Scan run completed successfully', result });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
-});
+};
+
+router.get('/trigger-reminders', handleTriggerReminders);  // Vercel Cron uses GET
+router.post('/trigger-reminders', handleTriggerReminders); // Frontend manual trigger uses POST
 
 // @route   POST /api/documents/:id/send-manual-email - Manual immediate alert email
 router.post('/:id/send-manual-email', async (req, res) => {
